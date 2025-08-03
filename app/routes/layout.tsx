@@ -1,7 +1,7 @@
 import { Link, Outlet, useNavigation, matchPath, type Location } from 'react-router'
 import { PostLoading } from '~/components/Post/loading'
 import { PostsLoading } from '~/components/Posts/loading'
-import AvatarImage from '~/assets/avatar.png'
+import AvatarImage from '~/assets/avatar.webp'
 
 const loadings = [
   {

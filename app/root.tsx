@@ -1,15 +1,11 @@
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
-import stylesheet from './app.css?url'
-import fontStylesheet from '@fontsource/lexend/index.css?url'
-import font700Stylesheet from '@fontsource/lexend/700.css?url'
+import './app.css'
+import '@fontsource/lexend/index.css'
+import '@fontsource/lexend/700.css'
 
 import type { Route } from './+types/root'
 
-export const links: Route.LinksFunction = () => [
-  { rel: 'stylesheet', href: stylesheet },
-  { rel: 'stylesheet', href: fontStylesheet },
-  { rel: 'stylesheet', href: font700Stylesheet },
-]
+export const links: Route.LinksFunction = () => []
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
