@@ -8,12 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@fontsource/bungee':
-        specifier: ^5.2.6
-        version: 5.2.6
-      '@fontsource/inter':
-        specifier: ^5.2.6
-        version: 5.2.6
       '@fontsource/lexend':
         specifier: ^5.2.9
         version: 5.2.9
@@ -390,12 +384,6 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
-
-  '@fontsource/bungee@5.2.6':
-    resolution: {integrity: sha512-bA0VFjqjCs0iJ0F5Shvo3AemOp/JoYDefOqo/OPPoDjx18oUfUMI3w5kRFsCmpOX1izpCeHnGnK0LcflO1ztqQ==}
-
-  '@fontsource/inter@5.2.6':
-    resolution: {integrity: sha512-CZs9S1CrjD0jPwsNy9W6j0BhsmRSQrgwlTNkgQXTsAeDRM42LBRLo3eo9gCzfH4GvV7zpyf78Ozfl773826csw==}
 
   '@fontsource/lexend@5.2.9':
     resolution: {integrity: sha512-0a5xzwksBilec8Q+QwPvTFKFcXYw31oyf5CthPKd+C5NJZDl1aHw4FcMz9bcRMPhq0LXO69BXI8aVxmj15pzNA==}
@@ -2541,10 +2529,6 @@ snapshots:
 
   '@esbuild/win32-x64@0.25.8':
     optional: true
-
-  '@fontsource/bungee@5.2.6': {}
-
-  '@fontsource/inter@5.2.6': {}
 
   '@fontsource/lexend@5.2.9': {}
 
