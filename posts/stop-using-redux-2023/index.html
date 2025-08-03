@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="preload" as="image" href="/assets/avatar-Do07upB6.png"/><link rel="preload" as="image" href="/stop-using-redux-2023/preview.png"/><title>Why you should stop using Redux in 2023 - Jayden&#x27;s Blog</title><meta property="og:title" content="Why you should stop using Redux in 2023 - Jayden&#x27;s Blog"/><meta name="twitter:card" content="summary_large_image"/><meta property="og:description" content="Redux introduces unnecessary complexity in modern React apps, making simpler, more local-first state tools like Jotai or React Query a better choice in 2023."/><meta property="og:image" content="/stop-using-redux-2023/preview.png"/><link rel="modulepreload" href="/assets/manifest-8913a7d1.js"/><link rel="modulepreload" href="/assets/entry.client-spw5TR__.js"/><link rel="modulepreload" href="/assets/chunk-C37GKA54-WSX-gxQw.js"/><link rel="modulepreload" href="/assets/root-v88ZLIFI.js"/><link rel="modulepreload" href="/assets/layout-CwT-T76C.js"/><link rel="modulepreload" href="/assets/loading-nZh_S99O.js"/><link rel="modulepreload" href="/assets/loading-DCuDbGIE.js"/><link rel="modulepreload" href="/assets/skeleton-BaFNaXHJ.js"/><link rel="modulepreload" href="/assets/post-B9ZEHWwB.js"/><link rel="modulepreload" href="/assets/clientLoaderWithQueryCache-C_w__z_e.js"/><link rel="stylesheet" href="/assets/app-Ds6m4cq9.css"/><link rel="stylesheet" href="/assets/index-C6y_6Fkq.css"/><link rel="stylesheet" href="/assets/700-D0-w1iJR.css"/></head><body><header class="py-4 flex items-center justify-between w-full max-w-[680px] px-6"><a class="text-blue-500" href="/" data-discover="true">Jayden&#x27;s Blog</a><div><a class="flex items-center space-x-2 hover:underline cursor-pointer" href="https://github.com/JaydenV8/jaydenv8.github.io" target="_blank"><span>By</span> <img src="/assets/avatar-Do07upB6.png" class="size-6 rounded-full" alt="avatar"/></a></div></header><div class="mx-auto flex flex-col w-full items-center"><img src="/stop-using-redux-2023/preview.png" alt="Why you should stop using Redux in 2023" class="object-cover aspect-square w-full max-w-[680px]"/><article class="prose dark:prose-invert article-content max-w-[680px] p-6 w-full"><h1>Why you should stop using Redux in 2023</h1><div class="flex justify-between items-end mb-8"><time dateTime="Thu Jun 01 2023 00:00:00 GMT+0000 (Coordinated Universal Time)" class="text-muted-foreground">Jun 01, 2023</time></div><blockquote>
+<p><strong>“If you don’t know whether you need Redux, you don’t need Redux.”</strong></p>
+<p>—— Dan Abramov</p>
+</blockquote>
+<p>Over the past few years, the JavaScript community has seen an increasing chorus of voices telling developers to “stop using Redux.” With the rise of tools like React Query, Zustand, Recoil, and built-in features like React’s Context API and useReducer, Redux is often labeled as “boilerplate-heavy,” “outdated,” or even “obsolete.”</p>
+<h2>Failure Case</h2>
+<p>Even with tools like RTK (Redux Toolkit), code often becomes unnecessarily complex. Here&#x27;s a simple example of managing global user info:</p>
+<pre><code class="language-tsx">// fetchUser.ts
+export const fetchUser = createAsyncThunk(
+  &#x27;user/fetchUser&#x27;,
+  async (id: string) =&gt; {
+    const response = await fetch(`/api/user/${id}`);
+    return await response.json();
+  }
+);
+// actionTypes.ts
+export const FETCH_USER_PENDING = &#x27;FETCH_USER_PENDING&#x27;
+// actions.ts
+export const fetchUserPending = () =&gt; ({ type: FETCH_USER_PENDING })
+// reducer.ts
+case FETCH_USER_PENDING:
+  return { ...state, loading: true }
+// component.tsx
+dispatch(fetchUserPending())
+</code></pre>
+<p>A simple user info request ends up scattered across multiple files. When your project scales, this becomes a giant mess of spaghetti.</p>
+<h3>A Better Solution</h3>
+<p>Let&#x27;s try implementing the same logic using Jotai:</p>
+<pre><code class="language-ts">const idAtom = atom(1)
+const userAtom = atomWithQuery((get) =&gt; ({
+  queryKey: [&#x27;users&#x27;, get(idAtom)],
+  queryFn: async ({ queryKey: [, id] }) =&gt; {
+    const res = await fetch(`/api/user/${id}`)
+    return res.json()
+  },
+}))
+</code></pre>
+<h2>Which Design Principles Redux Violates</h2>
+<h3>Separation of Concerns &amp; Single Responsibility</h3>
+<p>Redux encourages you to split state logic into:</p>
+<ul>
+<li>Action types</li>
+<li>Action creators</li>
+<li>Reducers</li>
+<li>Dispatch calls</li>
+</ul>
+<p>It may sound like &quot;decoupling,&quot; but in practice, a simple state change gets fragmented into four separate places.</p>
+<h3>Encapsulation &amp; Context Isolation</h3>
+<p>Redux relies on a global singleton store, which means:</p>
+<ul>
+<li>Any component can dispatch any action</li>
+<li>All components share the same state tree</li>
+</ul>
+<p>In medium to large applications, this lack of scoping makes logic hard to encapsulate or modularize.</p>
+<h3>Local Reasoning</h3>
+<p>React is meant to be &quot;component-driven,&quot; where ideally, a component’s behavior should be fully understandable within its own scope.</p>
+<p>But in Redux, to understand what a button does, you often have to:</p>
+<ol>
+<li>Check the <code>dispatch</code> in the component</li>
+<li>Look up the action creator file</li>
+<li>Jump to the reducer to see state changes</li>
+<li>Check the store for how reducers are combined</li>
+</ol>
+<p>Understanding “what this button does” can require jumping across five files.</p>
+<h2>Points That You Should Drop Redux</h2>
+<p>If you checked two or more boxes, Redux might no longer be the right fit for your project.</p>
+<ul>
+<li>[ ] Most of your state logic revolves around API requests and UI forms</li>
+<li>[ ] You feel like every new feature requires a bunch of new files</li>
+<li>[ ] You&#x27;ve already adopted RTK but development still feels slow</li>
+<li>[ ] New team members often struggle to understand slices and dispatch</li>
+</ul></article></div><script>((storageKey2, restoreKey) => {
+    if (!window.history.state || !window.history.state.key) {
+      let key = Math.random().toString(32).slice(2);
+      window.history.replaceState({ key }, "");
+    }
+    try {
+      let positions = JSON.parse(sessionStorage.getItem(storageKey2) || "{}");
+      let storedY = positions[restoreKey || window.history.state.key];
+      if (typeof storedY === "number") {
+        window.scrollTo(0, storedY);
+      }
+    } catch (error) {
+      console.error(error);
+      sessionStorage.removeItem(storageKey2);
+    }
+  })("react-router-scroll-positions", null)</script><script>window.__reactRouterContext = {"basename":"/","future":{"unstable_middleware":false,"unstable_optimizeDeps":false,"unstable_splitRouteModules":false,"unstable_subResourceIntegrity":false,"unstable_viteEnvironmentApi":false},"routeDiscovery":{"mode":"initial"},"ssr":true,"isSpaMode":false};window.__reactRouterContext.stream = new ReadableStream({start(controller){window.__reactRouterContext.streamController = controller;}}).pipeThrough(new TextEncoderStream());</script><script type="module" async="">import "/assets/manifest-8913a7d1.js";
+import * as route0 from "/assets/root-v88ZLIFI.js";
+import * as route1 from "/assets/layout-CwT-T76C.js";
+import * as route2 from "/assets/post-B9ZEHWwB.js";
+  
+  window.__reactRouterRouteModules = {"root":route0,"routes/layout":route1,"posts/stop-using-redux-2023":route2};
+
+import("/assets/entry.client-spw5TR__.js");</script><!--$?--><template id="B:0"></template><!--/$--><div hidden id="S:0"><script>window.__reactRouterContext.streamController.enqueue("[{\"_1\":2,\"_19\":-5,\"_20\":-5},\"loaderData\",{\"_3\":4},\"posts/stop-using-redux-2023\",{\"_5\":6,\"_7\":8},\"__raw\",\"\\\"use strict\\\";\\nconst {Fragment: _Fragment, jsx: _jsx, jsxs: _jsxs} = arguments[0];\\nfunction _createMdxContent(props) {\\n  const _components = {\\n    blockquote: \\\"blockquote\\\",\\n    code: \\\"code\\\",\\n    h2: \\\"h2\\\",\\n    h3: \\\"h3\\\",\\n    li: \\\"li\\\",\\n    ol: \\\"ol\\\",\\n    p: \\\"p\\\",\\n    pre: \\\"pre\\\",\\n    strong: \\\"strong\\\",\\n    ul: \\\"ul\\\",\\n    ...props.components\\n  };\\n  return _jsxs(_Fragment, {\\n    children: [_jsxs(_components.blockquote, {\\n      children: [\\\"\\\\n\\\", _jsx(_components.p, {\\n        children: _jsx(_components.strong, {\\n          children: \\\"“If you don’t know whether you need Redux, you don’t need Redux.”\\\"\\n        })\\n      }), \\\"\\\\n\\\", _jsx(_components.p, {\\n        children: \\\"—— Dan Abramov\\\"\\n      }), \\\"\\\\n\\\"]\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"Over the past few years, the JavaScript community has seen an increasing chorus of voices telling developers to “stop using Redux.” With the rise of tools like React Query, Zustand, Recoil, and built-in features like React’s Context API and useReducer, Redux is often labeled as “boilerplate-heavy,” “outdated,” or even “obsolete.”\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.h2, {\\n      children: \\\"Failure Case\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"Even with tools like RTK (Redux Toolkit), code often becomes unnecessarily complex. Here's a simple example of managing global user info:\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.pre, {\\n      children: _jsx(_components.code, {\\n        className: \\\"language-tsx\\\",\\n        children: \\\"// fetchUser.ts\\\\nexport const fetchUser = createAsyncThunk(\\\\n  'user/fetchUser',\\\\n  async (id: string) =\u003e {\\\\n    const response = await fetch(`/api/user/${id}`);\\\\n    return await response.json();\\\\n  }\\\\n);\\\\n// actionTypes.ts\\\\nexport const FETCH_USER_PENDING = 'FETCH_USER_PENDING'\\\\n// actions.ts\\\\nexport const fetchUserPending = () =\u003e ({ type: FETCH_USER_PENDING })\\\\n// reducer.ts\\\\ncase FETCH_USER_PENDING:\\\\n  return { ...state, loading: true }\\\\n// component.tsx\\\\ndispatch(fetchUserPending())\\\\n\\\"\\n      })\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"A simple user info request ends up scattered across multiple files. When your project scales, this becomes a giant mess of spaghetti.\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.h3, {\\n      children: \\\"A Better Solution\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"Let's try implementing the same logic using Jotai:\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.pre, {\\n      children: _jsx(_components.code, {\\n        className: \\\"language-ts\\\",\\n        children: \\\"const idAtom = atom(1)\\\\nconst userAtom = atomWithQuery((get) =\u003e ({\\\\n  queryKey: ['users', get(idAtom)],\\\\n  queryFn: async ({ queryKey: [, id] }) =\u003e {\\\\n    const res = await fetch(`/api/user/${id}`)\\\\n    return res.json()\\\\n  },\\\\n}))\\\\n\\\"\\n      })\\n    }), \\\"\\\\n\\\", _jsx(_components.h2, {\\n      children: \\\"Which Design Principles Redux Violates\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.h3, {\\n      children: \\\"Separation of Concerns \u0026 Single Responsibility\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"Redux encourages you to split state logic into:\\\"\\n    }), \\\"\\\\n\\\", _jsxs(_components.ul, {\\n      children: [\\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"Action types\\\"\\n      }), \\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"Action creators\\\"\\n      }), \\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"Reducers\\\"\\n      }), \\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"Dispatch calls\\\"\\n      }), \\\"\\\\n\\\"]\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"It may sound like \\\\\\\"decoupling,\\\\\\\" but in practice, a simple state change gets fragmented into four separate places.\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.h3, {\\n      children: \\\"Encapsulation \u0026 Context Isolation\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"Redux relies on a global singleton store, which means:\\\"\\n    }), \\\"\\\\n\\\", _jsxs(_components.ul, {\\n      children: [\\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"Any component can dispatch any action\\\"\\n      }), \\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"All components share the same state tree\\\"\\n      }), \\\"\\\\n\\\"]\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"In medium to large applications, this lack of scoping makes logic hard to encapsulate or modularize.\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.h3, {\\n      children: \\\"Local Reasoning\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"React is meant to be \\\\\\\"component-driven,\\\\\\\" where ideally, a component’s behavior should be fully understandable within its own scope.\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"But in Redux, to understand what a button does, you often have to:\\\"\\n    }), \\\"\\\\n\\\", _jsxs(_components.ol, {\\n      children: [\\\"\\\\n\\\", _jsxs(_components.li, {\\n        children: [\\\"Check the \\\", _jsx(_components.code, {\\n          children: \\\"dispatch\\\"\\n        }), \\\" in the component\\\"]\\n      }), \\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"Look up the action creator file\\\"\\n      }), \\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"Jump to the reducer to see state changes\\\"\\n      }), \\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"Check the store for how reducers are combined\\\"\\n      }), \\\"\\\\n\\\"]\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"Understanding “what this button does” can require jumping across five files.\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.h2, {\\n      children: \\\"Points That You Should Drop Redux\\\"\\n    }), \\\"\\\\n\\\", _jsx(_components.p, {\\n      children: \\\"If you checked two or more boxes, Redux might no longer be the right fit for your project.\\\"\\n    }), \\\"\\\\n\\\", _jsxs(_components.ul, {\\n      children: [\\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"[ ] Most of your state logic revolves around API requests and UI forms\\\"\\n      }), \\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"[ ] You feel like every new feature requires a bunch of new files\\\"\\n      }), \\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"[ ] You've already adopted RTK but development still feels slow\\\"\\n      }), \\\"\\\\n\\\", _jsx(_components.li, {\\n        children: \\\"[ ] New team members often struggle to understand slices and dispatch\\\"\\n      }), \\\"\\\\n\\\"]\\n    })]\\n  });\\n}\\nfunction MDXContent(props = {}) {\\n  const {wrapper: MDXLayout} = props.components || ({});\\n  return MDXLayout ? _jsx(MDXLayout, {\\n    ...props,\\n    children: _jsx(_createMdxContent, {\\n      ...props\\n    })\\n  }) : _createMdxContent(props);\\n}\\nreturn {\\n  default: MDXContent\\n};\\n\",\"attributes\",{\"_9\":10,\"_11\":12,\"_13\":14,\"_15\":16,\"_17\":18},\"title\",\"Why you should stop using Redux in 2023\",\"description\",\"Redux introduces unnecessary complexity in modern React apps, making simpler, more local-first state tools like Jotai or React Query a better choice in 2023.\",\"date\",[\"D\",1685577600000],\"category\",\"Marketing\",\"banner\",\"/stop-using-redux-2023/preview.png\",\"actionData\",\"errors\"]\n");</script><!--$?--><template id="B:1"></template><!--/$--></div><script>$RC=function(b,c,e){c=document.getElementById(c);c.parentNode.removeChild(c);var a=document.getElementById(b);if(a){b=a.previousSibling;if(e)b.data="$!",a.setAttribute("data-dgst",e);else{e=b.parentNode;a=b.nextSibling;var f=0;do{if(a&&8===a.nodeType){var d=a.data;if("/$"===d)if(0===f)break;else f--;else"$"!==d&&"$?"!==d&&"$!"!==d||f++}d=a.nextSibling;e.removeChild(a);a=d}while(a);for(;c.firstChild;)e.insertBefore(c.firstChild,a);b.data="$"}b._reactRetry&&b._reactRetry()}};$RC("B:0","S:0")</script><div hidden id="S:1"><script>window.__reactRouterContext.streamController.close();</script></div><script>$RC("B:1","S:1")</script></body></html>
