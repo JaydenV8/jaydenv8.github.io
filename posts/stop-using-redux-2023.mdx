@@ -1,0 +1,98 @@
+---
+title: Why you should stop using Redux in 2023
+description: Redux introduces unnecessary complexity in modern React apps, making simpler, more local-first state tools like Jotai or React Query a better choice in 2023.
+date: 2023-06-01
+category: Marketing
+banner: /stop-using-redux-2023/preview.png
+---
+
+> **“If you don’t know whether you need Redux, you don’t need Redux.”**
+>
+> —— Dan Abramov
+
+Over the past few years, the JavaScript community has seen an increasing chorus of voices telling developers to “stop using Redux.” With the rise of tools like React Query, Zustand, Recoil, and built-in features like React’s Context API and useReducer, Redux is often labeled as “boilerplate-heavy,” “outdated,” or even “obsolete.”
+
+## Failure Case
+
+Even with tools like RTK (Redux Toolkit), code often becomes unnecessarily complex. Here's a simple example of managing global user info:
+
+```tsx
+// fetchUser.ts
+export const fetchUser = createAsyncThunk(
+  'user/fetchUser',
+  async (id: string) => {
+    const response = await fetch(`/api/user/${id}`);
+    return await response.json();
+  }
+);
+// actionTypes.ts
+export const FETCH_USER_PENDING = 'FETCH_USER_PENDING'
+// actions.ts
+export const fetchUserPending = () => ({ type: FETCH_USER_PENDING })
+// reducer.ts
+case FETCH_USER_PENDING:
+  return { ...state, loading: true }
+// component.tsx
+dispatch(fetchUserPending())
+````
+
+A simple user info request ends up scattered across multiple files. When your project scales, this becomes a giant mess of spaghetti.
+
+### A Better Solution
+
+Let's try implementing the same logic using Jotai:
+
+```ts
+const idAtom = atom(1)
+const userAtom = atomWithQuery((get) => ({
+  queryKey: ['users', get(idAtom)],
+  queryFn: async ({ queryKey: [, id] }) => {
+    const res = await fetch(`/api/user/${id}`)
+    return res.json()
+  },
+}))
+```
+
+## Which Design Principles Redux Violates
+
+### Separation of Concerns & Single Responsibility
+
+Redux encourages you to split state logic into:
+
+* Action types
+* Action creators
+* Reducers
+* Dispatch calls
+
+It may sound like "decoupling," but in practice, a simple state change gets fragmented into four separate places.
+
+### Encapsulation & Context Isolation
+
+Redux relies on a global singleton store, which means:
+
+* Any component can dispatch any action
+* All components share the same state tree
+
+In medium to large applications, this lack of scoping makes logic hard to encapsulate or modularize.
+
+### Local Reasoning
+
+React is meant to be "component-driven," where ideally, a component’s behavior should be fully understandable within its own scope.
+
+But in Redux, to understand what a button does, you often have to:
+
+1. Check the `dispatch` in the component
+2. Look up the action creator file
+3. Jump to the reducer to see state changes
+4. Check the store for how reducers are combined
+
+Understanding “what this button does” can require jumping across five files.
+
+## Points That You Should Drop Redux
+If you checked two or more boxes, Redux might no longer be the right fit for your project.
+
+* [ ] Most of your state logic revolves around API requests and UI forms
+* [ ] You feel like every new feature requires a bunch of new files
+* [ ] You've already adopted RTK but development still feels slow
+* [ ] New team members often struggle to understand slices and dispatch
+
